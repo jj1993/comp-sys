@@ -1,10 +1,35 @@
 import matplotlib.plot as plt
 import numpy as np
 
+<<<<<<< HEAD
 
 class Car(object):
 	def __init__(self):
 		#NICK TSAKMAKIDIS IS A COMPUTER SCIENTIST
+=======
+class Car(object):
+<<<<<<< HEAD
+	def __init__(self):
+		#NICK TSAKMAKIDIS IS A COMPUTER SCIENTISThhhhee
+=======
+	def __init__(self, edge, route):
+	   self.edge = edge
+      self.route = route
+      # test
+
+    def getEdge(self):
+        return self.edge
+
+    def setNewEdge(self):
+        del self.route[0]
+        if len(self.route) != 0:
+            self.edge = route[0]
+        else: self.edge = False
+
+    def setNewLocation(self, acceleration):
+        pass
+>>>>>>> 23d671f63195ac45f6ed774e46a41d6a2f1f4175
+>>>>>>> 24c6bb875d2356f8a7f86bdf8263020cd799a3b4
 
 class Edge(object):
 	def __init__(self):
@@ -52,3 +77,6 @@ for t in time:
 			newCarList.append(car)
 
 averageSpeed = sum([car.getAverageSpeed() for car in cars])/len(cars)
+
+
+# NIkoleta
