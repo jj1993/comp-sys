@@ -4,7 +4,7 @@ import numpy as np
 
 class Car(object):
 	def __init__(self):
-		#hello marios and jonathan
+		#NICK TSAKMAKIDIS IS A COMPUTER SCIENTIST
 
 class Edge(object):
 	def __init__(self):
