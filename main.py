@@ -73,4 +73,4 @@ for t in time:
 averageSpeed = sum([car.getAverageSpeed() for car in cars])/len(cars)
 
 
-
+# some changes
