@@ -4,8 +4,9 @@ import random
 
 class Car(object):
 	def __init__(self, edge, route):
-		self.edge = edge
-        self.route = route
+	   self.edge = edge
+      self.route = route
+      # test
 
     def getEdge(self):
         return self.edge
