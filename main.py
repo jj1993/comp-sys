@@ -5,11 +5,13 @@ import numpy as np
 
 class Car(object):
 	def __init__(self):
-		
 
-	def __init__(self, edge, route):
+
+	def __init__(self, edge,x, route,speed):
 	   self.edge = edge
-      self.route = route
+       self.route = route
+	   self.x=x
+	   self.speed=speed
       # test
 
     def getEdge(self):
@@ -50,6 +52,11 @@ def accelerationRule(distance,speed):
 		return distance/safedist
 	else
 		return 1
+def distance(car1,car2):
+	return abs(car1.x-car2.X)
+
+def newspeed(speed):
+	return speed*acceleration
 
 def computeNewLocation(acceleration, car):
 	distance = acceleration*timestep
