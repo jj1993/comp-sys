@@ -40,10 +40,10 @@ class Car(object):
                  + frontCar.getPos()
                  )
             print('+  ',round(difference))
-
-        difference = abs(difference)
         if difference + 2 < self.speed:
-            self.speed=difference
+            self.speed = difference
+            if self.speed < 0:
+                self.speed = 0
 
 # Updating locations and moving to new edges
     def setNewEdge(self):
@@ -78,13 +78,15 @@ class Car(object):
                 return True
 
     def getFrontCar(self):
-        for car in self.edge.getCars():
-            if car.getPos() > self.pos:
-                return car
-        if len(route) != 0:
-            nextCarList = route[0].getCars()
+        cars = self.edge.getCars()
+        for n, car in enumerate(cars):
+            if car == self:
+                if n > 0:
+                    return cars[n-1]
+                break
+        if len(self.route) != 0:
+            nextCarList = self.route[0].getCars()
             if len(nextCarList) != 0:
-                print("CAR ON DIFFERENT EDGE")
                 return nextCarList[-1]
         return False
 
@@ -137,17 +139,18 @@ p = 0.5
 if __name__ == '__main__':
     # Activate interactive visualisation
     plt.ion()
+    plt.pause(5)
     # Initialise network, for now only one road
-    road1 = Edge((0,0),(100,0))
-    road2 = Edge((100,0),(200,-10))
-    road3 = Edge((100,0),(200,10))
+    road1 = Edge((0,10),(100,0))
+    road2 = Edge((0,-10),(100,0))
+    road3 = Edge((100,0),(200,0))
 
     # Generate all agents
     cars = []
     activeCars = []
     for c in range(totCars):
-        road = random.choice([road2, road3])
-        route = [road1, road]
+        road = random.choice([road2, road1])
+        route = [road, road3]
         speed = maxSpeed - 2 + 2*np.random.random()
         cars.append(Car(route[0], route[1:], speed))
 
