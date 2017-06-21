@@ -1,8 +1,6 @@
-# this is python 2.7
-
 import networkx as nx
 import pandas as pd
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 x = pd.read_csv("dutchhighway.csv", sep=';').values
 
@@ -23,7 +21,8 @@ G.add_weighted_edges_from(edges)
 
 #print nx.degree(G)
 
-#plt.hist(nx.degree(G).values())
+x = list(nx.degree(G).values())
+plt.hist(x)
 nx.draw(G)
 
-print nx.average_shortest_path_length(G)
+print(nx.average_shortest_path_length(G))
