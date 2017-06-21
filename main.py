@@ -2,11 +2,13 @@ import matplotlib.plot as plt
 import numpy as np
 
 class Car(object):
-	def __init__(self, edge,x, route,speed):
+	def __init__(self, edge, x, route,speed):
 	   self.edge = edge
        self.route = route
-	   self.x=x
+	   self.x = x
 	   self.speed=speed
+	   # Visualisation point
+	   self.vis = plt.plot(0,0, 'ro', markersize=4)[0]
 
     def getEdge(self):
         return self.edge
@@ -17,8 +19,12 @@ class Car(object):
             self.edge = route[0]
         else: self.edge = False
 
-    def setNewLocation(self, acceleration):
-        pass
+    def setLocation(self, speed):
+        newX = x + speed*timestep
+		# Updating visualisation information
+		self.vis.set_data(newX,0)
+		# Updating location
+		self.x = newX
 
 class Edge(object):
 	def __init__(self, node1, node2):
@@ -86,8 +92,8 @@ if __name__ == '__main__':
 			car.setLocation() = computeNewLocation(acceleration, car)
 			if not car.getLocation() == offMap:
 				newCarList.append(car)
+			
+    	plt.pause(0.1)
+
 
 	averageSpeed = sum([car.getAverageSpeed() for car in cars])/len(cars)
-
-
-	# some changes
