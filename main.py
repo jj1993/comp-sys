@@ -1,18 +1,12 @@
 import matplotlib.plot as plt
 import numpy as np
 
-
-
 class Car(object):
-	def __init__(self):
-
-
 	def __init__(self, edge,x, route,speed):
 	   self.edge = edge
        self.route = route
 	   self.x=x
 	   self.speed=speed
-      # test
 
     def getEdge(self):
         return self.edge
@@ -26,11 +20,16 @@ class Car(object):
     def setNewLocation(self, acceleration):
         pass
 
-
 class Edge(object):
-	def __init__(self):
-		(...)
+	def __init__(self, node1, node2):
+		x1, y1 = node1
+		x2, y2 = node2
+		plt.plot((x1,x2),(y1,y2))
+		self.node1 = node1
+		self.node2 = node2
+		self.length = math.sqrt((x2-x1)**2 + (y2-y1)**2)
 
+totCars = 10
 influx = 1 #cars per timestep
 timestep = 1 #minutes per timestep
 network = [Edge((0,0),())]
@@ -65,19 +64,30 @@ def computeNewLocation(acceleration, car):
 		car.setEdge(car.getNewEdge())
 	car.setNewLocation()
 
-for t in time:
-	cars += addNewCars(influx)
-	newCarList = []
-	for n, car in enumerate(cars):
-		myLocation = car.getLocation()
-		hisLocation = cars[n+1].getLocation()
-		distance =hisLocation - myLocation
-		acceleration = accelerationRule(distance)
-		car.setLocation() = computeNewLocation(acceleration, car)
-		if not car.getLocation() == offMap:
-			newCarList.append(car)
+if __name__ == '__main__':
+	# Activate interactive visualisation
+	plt.ion()
+	# Initialise network, for now only one road
+	road = Edge((0,0),(100,0))
 
-averageSpeed = sum([car.getAverageSpeed() for car in cars])/len(cars)
+	# Generate all agents
+	carlist = []
+	for c in range(totCars):
+		pass
+
+	for t in time:
+		cars += addNewCars(influx)
+		newCarList = []
+		for n, car in enumerate(cars):
+			myLocation = car.getLocation()
+			hisLocation = cars[n+1].getLocation()
+			distance =hisLocation - myLocation
+			acceleration = accelerationRule(distance)
+			car.setLocation() = computeNewLocation(acceleration, car)
+			if not car.getLocation() == offMap:
+				newCarList.append(car)
+
+	averageSpeed = sum([car.getAverageSpeed() for car in cars])/len(cars)
 
 
-# some changes
+	# some changes
