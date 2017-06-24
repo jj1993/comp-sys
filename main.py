@@ -129,7 +129,7 @@ class Edge(object):
         return self.cars
 
 # Some constants
-totCars = 10
+totCars = 1000
 influx = 1 #cars per timestep
 timestep = 1 #seconds per timestep
 time = 100
@@ -141,16 +141,32 @@ if __name__ == '__main__':
     plt.ion()
     plt.pause(5)
     # Initialise network, for now only one road
-    road1 = Edge((0,10),(100,0))
-    road2 = Edge((0,-10),(100,0))
-    road3 = Edge((100,0),(200,0))
+    road1 = Edge((0,0),(100,30))
+    road2 = Edge((0,0),(100,-30))
+    road3 = Edge((100,30),(200,30))
+    road4 = Edge((100,-30),(200,-30))
+    road5= Edge((200,30),(300,0))
+    road6 = Edge((200,-30),(300,0))
+    road7= Edge((0,0),(150,0))
+
+    road8= Edge((100,-30),(150,0))
+    road9= Edge ((100,30),(150,0))
+    road10= Edge((150,0),(200,-30))
+    road11= Edge((150,0),(200,30))
+    road12= Edge((150,0),(300,0))
+    road13= Edge((300,0),(400,0))
+
+
 
     # Generate all agents
     cars = []
     activeCars = []
     for c in range(totCars):
-        road = random.choice([road2, road1])
-        route = [road, road3]
+        road = random.choice([road1, road2, road3,
+        road4,road5,road6,road7,road8,road9,road10,
+        road11,road12])
+
+        route = [road, road13]
         speed = maxSpeed - 2 + 2*np.random.random()
         cars.append(Car(route[0], route[1:], speed))
 
@@ -175,9 +191,9 @@ if __name__ == '__main__':
             if onEdge:
                 newActiveCars.append(car)
 
-        print([round(car.getPos()) for car in newActiveCars])
+        #print([round(car.getPos()) for car in newActiveCars])
         activeCars = newActiveCars
-        plt.pause(0.5)
+        plt.pause(0.2)
 
     averageSpeed = sum([car.getAverageSpeed() for car in cars])/len(cars)
 
