@@ -1,7 +1,7 @@
-import matplotlib.pyplot as plt
 import numpy as np
 import random
 import copy
+
 
 class Car(object):
     def __init__(self, edge, route, speed):
@@ -9,7 +9,7 @@ class Car(object):
         edge.addCar(self)
         self.route = route
         self.pos = 0
-        self.speed=speed
+        self.speed = speed
         self.age = 0
         self.aveSpeed = 0
 
@@ -22,32 +22,34 @@ class Car(object):
 # The three speed rules
     def accelerationRule(self):
         if self.speed <= maxSpeed - maxSpeed/steps:
-            self.speed+=maxSpeed/steps
+            self.speed += maxSpeed/steps
 
     def randomizationRule(self):
-        var=np.random.uniform(0,1)
+        var = np.random.uniform(0, 1)
         if self.speed > maxSpeed/steps:
-             if var<p:
-                 self.speed-=maxSpeed/(steps)
+            if var < p:
+                self.speed -= maxSpeed/(steps)
 
     def distanceRule(self, frontCar):
         hisEdge = frontCar.getEdge()
         if hisEdge == self.edge:
             difference = frontCar.getPos() - self.pos
+            # print(difference)
         else:
             difference = (
-                 self.edge.getLength() - self.pos
-                 + frontCar.getPos()
-                 )
+                 self.edge.getLength() - self.pos + frontCar.getPos())
         if 2*(difference + 2) < self.speed:
             self.speed = difference
+            if self.speed < 0:
+                self.speed = 0
 
 # Updating locations and moving to new edges
     def setNewEdge(self):
         del self.route[0]
         if len(self.route) != 0:
-            self.edge = route[0]
-        else: self.edge = False
+            self.edge = self.route[0]
+        else:
+            self.edge = False
 
     def update(self, timestep):
         self.aveSpeed = (self.aveSpeed*self.age + self.speed)/(self.age + 1)
@@ -93,11 +95,14 @@ class Car(object):
     def getAverageSpeed(self):
         return self.aveSpeed
 
+
 class Edge(object):
     def __init__(self, node1, node2):
         x1, y1 = node1
         x2, y2 = node2
         self.length = np.sqrt((x2-x1)**2 + (y2-y1)**2)
+        x1, y1 = node1
+        x2, y2 = node2
         self.angle = np.arctan((y2-y1)/(x2-x1))
         self.x1, self.y1 = x1, y1
         self.x2, self.y2 = x2, y2
@@ -135,16 +140,17 @@ class Edge(object):
 # ==============
 # Some constants
 # ==============
-totCars = 200  #number of cars initiated in simulation
-maxSpeed = 5   #maximum speed (m/s)
-p = 0.2         #change of slowing down every speed update
+totCars = 200  # number of cars initiated in simulation
+maxSpeed = 20   # maximum speed (m/s)
+p = 0.2         # change of slowing down every speed update
 interval = 0.4   # time steps between cars
-steps = 5.0     #number of speed steps as interpreted from the CA model
+steps = 5.0     # number of speed steps as interpreted from the CA model
+
 
 def chooseRandomRoute(network, startNode, numEdges):
     route = []
-
-    lastx, lasty = (0,0)
+    rNode = random.choice(network)
+    lastx, lasty = rNode.getStart()
     while True:
         options = []
         for edge in network:
@@ -154,9 +160,11 @@ def chooseRandomRoute(network, startNode, numEdges):
         route.append(random.choice(options))
 
         lastx, lasty = route[-1].getEnd()
-        if (lastx, lasty) == (400, 0): break
+        if len(route) == numEdges:
+            break
 
     return route
+
 
 def addNewCars(totCars, network):
     # Generate all agents
@@ -164,14 +172,14 @@ def addNewCars(totCars, network):
     for c in range(totCars):
         startNode = random.choice(network).getStart()
         numEdges = random.choice(range(4))+1
-        if c%100 == 0: print('Routing cars ',c+100)
+#        if c%100 == 0: print('Routing cars ',c+100)
         route = chooseRandomRoute(network, startNode, numEdges)
         speed = 0
         cars.append(Car(route[0], route[1:], speed))
-
     return cars
 
-def updatePositions(cars, timestep):
+
+def updatePositions(cars, timestep, network):
     newCars = []
     # Locations are updated on every timestep
     for car in cars:
@@ -182,30 +190,35 @@ def updatePositions(cars, timestep):
     [edge.update() for edge in network]
     return newCars
 
+
 def updateSpeed(car):
     car.accelerationRule()
     car.randomizationRule()
     frontCar = car.getFrontCar()
-    if frontCar: car.distanceRule(frontCar)
+    if frontCar:
+        car.distanceRule(frontCar)
     return
 
-def runSimulation(cars):
+
+def runSimulation(cars, network):
     # Activate interactive visualisation
 
     activeCars = []
     t = 0
     while len(cars) > 0 or len(activeCars) > 0:
         # Speeds are updated on the end of every second!
-        timeToNewCar = round(interval - t%interval, 2)
-        if timeToNewCar < 1e-2: timeToNewCar = round(interval, 2)
-        timeToSpeedUpdate = round(1 - t%1, 2)
-        if timeToSpeedUpdate < 1e-2: timeToSpeedUpdate = 1
+        timeToNewCar = round(interval - t % interval, 2)
+        if timeToNewCar < 1e-2:
+            timeToNewCar = round(interval, 2)
+        timeToSpeedUpdate = round(1 - t % 1, 2)
+        if timeToSpeedUpdate < 1e-2:
+            timeToSpeedUpdate = 1
 
         if timeToSpeedUpdate <= timeToNewCar:
             # First travel remaining distance
             timestep = timeToSpeedUpdate
             t += timestep
-            activeCars = updatePositions(activeCars, timestep)
+            activeCars = updatePositions(activeCars, timestep, network)
             # Then update speeds
             [updateSpeed(car) for car in activeCars]
             if timeToSpeedUpdate == timeToNewCar and len(cars) != 0:
@@ -213,43 +226,41 @@ def runSimulation(cars):
                 activeCars.append(cars[0])
                 cars[0].activate()
                 del cars[0]
-
         else:
             # First travel remaining distance
             timestep = timeToNewCar
             t += timestep
-            activeCars = updatePositions(activeCars, timestep)
+            activeCars = updatePositions(activeCars, timestep, network)
             # Then add new car
             if len(cars) != 0:
                 activeCars.append(cars[0])
                 cars[0].activate()
                 del cars[0]
-
         t = round(t, 2)
     return
 
-if __name__ == '__main__':
-    # Initialise network, for now only one road
-    edges = [
-        [(0,0),(100,30)],
-        [(0,0),(100,-30)],
-        [(0,0),(150,0)],
-        [(100,30),(200,30)],
-        [(100,-30),(200,-30)],
-        [(200,30),(300,0)],
-        [(200,-30),(300,0)],
-        [(100,-30),(150,0)],
-        [(100,30),(150,0)],
-        [(150,0),(200,-30)],
-        [(150,0),(200,30)],
-        [(150,0),(300,0)],
-        [(300,0),(400,0)],
-    ]
-    # edges += [(end, start) for start, end in edges]
-    network = [Edge(start, end) for start, end in edges]
 
+def main(edges):
+    # Initialise network, for now only one road
+#    edges = [
+#        [(0,0),(100,30)],
+#        [(0,0),(100,-30)],
+#        [(0,0),(150,0)],
+#        [(100,30),(200,30)],
+#        [(100,-30),(200,-30)],
+#        [(200,30),(300,0)],
+#        [(200,-30),(300,0)],
+#        [(100,-30),(150,0)],
+#        [(100,30),(150,0)],
+#        [(150,0),(200,-30)],
+#        [(150,0),(200,30)],
+#        [(150,0),(300,0)],
+#        [(300,0),(400,0)],
+#    ]
+    edges += [(end, start) for start, end in edges]
+    network = [Edge(start, end) for start, end in edges]
     # Generate all agents
     cars = addNewCars(totCars, network)
-    runSimulation(copy.copy(cars))
+    runSimulation(copy.copy(cars), network)
     averageSpeed = sum([car.getAverageSpeed() for car in cars])/len(cars)
-    print(averageSpeed)
+    return averageSpeed
