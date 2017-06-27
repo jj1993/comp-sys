@@ -12,9 +12,6 @@ class Car(object):
         self.speed=speed
         self.age = 0
         self.aveSpeed = 0
-        # Visualisation point
-        x, y = edge.getStart()
-        self.vis = plt.plot(x, y, 's', markersize=2)[0]
 
     def getPos(self):
         return self.pos
@@ -42,8 +39,8 @@ class Car(object):
                  self.edge.getLength() - self.pos
                  + frontCar.getPos()
                  )
-        if difference + 2 < self.speed:
-            self.speed = 0.5*(difference)
+        if 2*(difference + 2) < self.speed:
+            self.speed = difference
 
 # Updating locations and moving to new edges
     def setNewEdge(self):
@@ -60,12 +57,9 @@ class Car(object):
         if self.pos + distance < self.edge.getLength():
             # Updating visualisation information
             self.pos += distance
-            x, y = self.edge.getXY(self.pos)
-            self.vis.set_data(x, y)
             return True
         else:
             if len(self.route) == 0:
-                self.vis.remove()
                 self.pos += distance
                 self.edge.removeCar(self)
                 return False
@@ -77,7 +71,6 @@ class Car(object):
                 self.edge.addCar(self)
                 del self.route[0]
                 x, y = self.edge.getXY(self.pos)
-                self.vis.set_data(x, y)
                 return True
 
     def getFrontCar(self):
@@ -104,7 +97,6 @@ class Edge(object):
     def __init__(self, node1, node2):
         x1, y1 = node1
         x2, y2 = node2
-        plt.plot((x1,x2),(y1,y2))
         self.length = np.sqrt((x2-x1)**2 + (y2-y1)**2)
         self.angle = np.arctan((y2-y1)/(x2-x1))
         self.x1, self.y1 = x1, y1
@@ -197,8 +189,7 @@ def updateSpeed(car):
     if frontCar: car.distanceRule(frontCar)
     return
 
-def runSimulation(cars, vis=True):
-    if vis: plt.ion()
+def runSimulation(cars):
     # Activate interactive visualisation
 
     activeCars = []
@@ -235,8 +226,6 @@ def runSimulation(cars, vis=True):
                 del cars[0]
 
         t = round(t, 2)
-        if vis: plt.pause(0.1)
-
     return
 
 if __name__ == '__main__':
@@ -261,6 +250,6 @@ if __name__ == '__main__':
 
     # Generate all agents
     cars = addNewCars(totCars, network)
-    runSimulation(copy.copy(cars), vis=True)
+    runSimulation(copy.copy(cars))
     averageSpeed = sum([car.getAverageSpeed() for car in cars])/len(cars)
     print(averageSpeed)
