@@ -111,6 +111,9 @@ class Edge(object):
     def getLength(self):
         return self.length
 
+    def setMinLength(self):
+        self.length = 2*maxSpeed
+
     def getXY(self, pos):
         x = self.x1 + np.cos(self.angle)*pos
         y = self.y1 + np.sin(self.angle)*pos
@@ -140,43 +143,39 @@ class Edge(object):
 # ==============
 # Some constants
 # ==============
-totCars = 200  # number of cars initiated in simulation
-maxSpeed = 20   # maximum speed (m/s)
-p = 0.2         # change of slowing down every speed update
+totCars = 500  # number of cars initiated in simulation
+maxSpeed = 5   # maximum speed (m/s)
+p = 0.2       # change of slowing down every speed update
 interval = 0.4   # time steps between cars
 steps = 5.0     # number of speed steps as interpreted from the CA model
 
 
-def chooseRandomRoute(network, startNode, numEdges, G):
-    if G is None:
-        route = []
-        rNode = random.choice(network)
-        lastx, lasty = rNode.getStart()
-        while True:
-            options = []
-            for edge in network:
-                thisx, thisy = edge.getStart()
-                if thisx == lastx and thisy == lasty:
-                    options.append(edge)
-            route.append(random.choice(options))
-            lastx, lasty = route[-1].getEnd()
-            if len(route) == numEdges:
-                break
-    else:
-        # get random start and end
-        x = False
-        # calculate shortest path
+def chooseRandomRoute(network, startNode, numEdges):
+    route = []
+    rNode = random.choice(network)
+    lastx, lasty = rNode.getStart()
+    while True:
+        options = []
+        for edge in network:
+            thisx, thisy = edge.getStart()
+            if thisx == lastx and thisy == lasty:
+                options.append(edge)
+        route.append(random.choice(options))
+        lastx, lasty = route[-1].getEnd()
+        if len(route) == numEdges:
+            break
+
     return route
 
 
-def addNewCars(totCars, network, G):
+def addNewCars(totCars, network):
     # Generate all agents
     cars = []
     for c in range(totCars):
         startNode = random.choice(network).getStart()
-        numEdges = random.choice(range(4))+1
+        numEdges = random.choice(range(5))+2
 #        if c%100 == 0: print('Routing cars ',c+100)
-        route = chooseRandomRoute(network, startNode, numEdges, G)
+        route = chooseRandomRoute(network, startNode, numEdges)
         speed = 0
         cars.append(Car(route[0], route[1:], speed))
     return cars
@@ -243,7 +242,7 @@ def runSimulation(cars, network):
     return
 
 
-def main(edges, G):
+def main(edges):
     # Initialise network, for now only one road
 #    edges = [
 #        [(0,0),(100,30)],
@@ -263,9 +262,10 @@ def main(edges, G):
 
     edges += [(end, start) for start, end in edges]
     network = [Edge(start, end) for start, end in edges]
+    [edge.setMinLength() for edge in network if edge.getLength() < 2*maxSpeed]
 
     # Generate all agents
-    cars = addNewCars(totCars, network, G)
+    cars = addNewCars(totCars, network)
     runSimulation(copy.copy(cars), network)
     averageSpeed = sum([car.getAverageSpeed() for car in cars])/len(cars)
     return averageSpeed

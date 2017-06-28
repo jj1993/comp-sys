@@ -4,18 +4,28 @@ import matplotlib.pyplot as plt
 from math import sqrt
 import planar_netJoop as pn
 
-M = 10  # number of monte carlo runs per network size
-N = 6  # nr of network sizes
-NW_SIZE = np.linspace(100, 200, num=N, dtype=int)  # size in nr of edges
+M = 2  # number of monte carlo runs per network size
+N = 5  # nr of network sizes
+NW_SIZE = np.linspace(125, 165, num=N, dtype=int)  # size in nr of edges
 AVG_SPEEDS = np.empty((len(NW_SIZE), M))  # simulation results
+CLUST = np.linspace(0.05, .45, num=N)
+AVG_SPEEDS_CLUST = np.empty((len(CLUST), M))
 
 
 def main():
-    for i in range(len(NW_SIZE)):
+
+    # change clustering with degreeNrs constant at 145
+    for i in range(N):
         for m in range(M):
-            edges, G = pn.createplanar(NW_SIZE[i])  # function
-            AVG_SPEEDS[i, m] = bn.main(edges, None)
-            print(len(NW_SIZE) - i, M - m)
+            edges = pn.main(145, CLUST[i])
+            print(len(CLUST) - i, M - m)
+            AVG_SPEEDS_CLUST[i, m] = bn.main(edges)
+            edges = pn.main(NW_SIZE[i], 0.11)  # function
+            AVG_SPEEDS[i, m] = bn.main(edges)
+    plt.errorbar(CLUST, AVG_SPEEDS_CLUST.mean(axis=1),
+                 AVG_SPEEDS_CLUST.std(axis=1) / sqrt(M))
+    plt.show()
+    plt.figure()
     plt.errorbar(NW_SIZE, AVG_SPEEDS.mean(axis=1),
                  AVG_SPEEDS.std(axis=1) / sqrt(M))
     plt.show()
