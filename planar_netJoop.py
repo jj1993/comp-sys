@@ -1,7 +1,3 @@
-
-# coding: utf-8
-
-# In[ ]:
 import numpy as np
 import networkx as nx
 from scipy.spatial import Delaunay
@@ -70,5 +66,5 @@ def createplanar(num):
     for i in range(0,len(edg)):
         edges.append([tuple(point[edg[i][0]]),tuple(point[edg[i][1]])])
         
-    return edges
+    return edges, G
 

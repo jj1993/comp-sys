@@ -147,33 +147,36 @@ interval = 0.4   # time steps between cars
 steps = 5.0     # number of speed steps as interpreted from the CA model
 
 
-def chooseRandomRoute(network, startNode, numEdges):
-    route = []
-    rNode = random.choice(network)
-    lastx, lasty = rNode.getStart()
-    while True:
-        options = []
-        for edge in network:
-            thisx, thisy = edge.getStart()
-            if thisx == lastx and thisy == lasty:
-                options.append(edge)
-        route.append(random.choice(options))
-
-        lastx, lasty = route[-1].getEnd()
-        if len(route) == numEdges:
-            break
-
+def chooseRandomRoute(network, startNode, numEdges, G):
+    if G is None:
+        route = []
+        rNode = random.choice(network)
+        lastx, lasty = rNode.getStart()
+        while True:
+            options = []
+            for edge in network:
+                thisx, thisy = edge.getStart()
+                if thisx == lastx and thisy == lasty:
+                    options.append(edge)
+            route.append(random.choice(options))
+            lastx, lasty = route[-1].getEnd()
+            if len(route) == numEdges:
+                break
+    else:
+        # get random start and end
+        x = False
+        # calculate shortest path
     return route
 
 
-def addNewCars(totCars, network):
+def addNewCars(totCars, network, G):
     # Generate all agents
     cars = []
     for c in range(totCars):
         startNode = random.choice(network).getStart()
         numEdges = random.choice(range(4))+1
 #        if c%100 == 0: print('Routing cars ',c+100)
-        route = chooseRandomRoute(network, startNode, numEdges)
+        route = chooseRandomRoute(network, startNode, numEdges, G)
         speed = 0
         cars.append(Car(route[0], route[1:], speed))
     return cars
@@ -240,7 +243,7 @@ def runSimulation(cars, network):
     return
 
 
-def main(edges):
+def main(edges, G):
     # Initialise network, for now only one road
 #    edges = [
 #        [(0,0),(100,30)],
@@ -257,10 +260,12 @@ def main(edges):
 #        [(150,0),(300,0)],
 #        [(300,0),(400,0)],
 #    ]
+
     edges += [(end, start) for start, end in edges]
     network = [Edge(start, end) for start, end in edges]
+
     # Generate all agents
-    cars = addNewCars(totCars, network)
+    cars = addNewCars(totCars, network, G)
     runSimulation(copy.copy(cars), network)
     averageSpeed = sum([car.getAverageSpeed() for car in cars])/len(cars)
     return averageSpeed
