@@ -1,6 +1,7 @@
 import numpy as np
 import random
 import copy
+import networkx as nx
 
 
 class Car(object):
@@ -114,6 +115,9 @@ class Edge(object):
     def setMinLength(self):
         self.length = 2*maxSpeed
 
+    def setNewLength(self, ratio):
+        self.length = self.length * ratio
+
     def getXY(self, pos):
         x = self.x1 + np.cos(self.angle)*pos
         y = self.y1 + np.sin(self.angle)*pos
@@ -150,32 +154,58 @@ interval = 0.4   # time steps between cars
 steps = 5.0     # number of speed steps as interpreted from the CA model
 
 
-def chooseRandomRoute(network, startNode, numEdges):
-    route = []
-    rNode = random.choice(network)
-    lastx, lasty = rNode.getStart()
-    while True:
-        options = []
-        for edge in network:
-            thisx, thisy = edge.getStart()
-            if thisx == lastx and thisy == lasty:
-                options.append(edge)
-        route.append(random.choice(options))
-        lastx, lasty = route[-1].getEnd()
-        if len(route) == numEdges:
-            break
-
+def chooseRandomRoute(network, startNode, numEdges, G, keys, degreesP):
+    global sPathB
+    if sPathB:
+        source = np.random.choice(keys, 1, replace=True, p=degreesP)[0]
+        target = source
+        while source == target:
+            target = np.random.choice(keys, 1, replace=True, p=degreesP)[0]
+        sPath = nx.shortest_path(G, source, target, weight="length")
+        route = []
+        for i in range(len(sPath)):
+            if i >= len(sPath) - 1:
+                break
+            source = sPath[i]
+            target = sPath[i + 1]
+            x, y = list(G.node[source].values())[0]
+            a, b = list(G.node[target].values())[0]
+            for edge in network:
+                thisX, thisY = edge.getStart()
+                thisA, thisB = edge.getEnd()
+                if thisX == x and thisY == y and thisA == a and thisB == b:
+                    route.append(edge)
+    else:
+        route = []
+        rNode = random.choice(network)
+        lastx, lasty = rNode.getStart()
+        while True:
+            options = []
+            for edge in network:
+                thisx, thisy = edge.getStart()
+                if thisx == lastx and thisy == lasty:
+                    options.append(edge)
+            route.append(random.choice(options))
+            lastx, lasty = route[-1].getEnd()
+            if len(route) == numEdges:
+                break
     return route
 
 
-def addNewCars(totCars, network):
+def addNewCars(totCars, network, G):
+    keys = list(nx.degree(G, nx.nodes(G)).keys())
+    degrees = list(nx.degree(G, nx.nodes(G)).values())
+    degreesP = np.array(degrees, dtype=np.float)
+    sumD = np.sum(degreesP)
+    degreesP = degreesP / sumD
     # Generate all agents
     cars = []
     for c in range(totCars):
         startNode = random.choice(network).getStart()
-        numEdges = random.choice(range(5))+2
+        numEdges = random.choice(range(7))+3
 #        if c%100 == 0: print('Routing cars ',c+100)
-        route = chooseRandomRoute(network, startNode, numEdges)
+        route = chooseRandomRoute(network, startNode, numEdges,
+                                  G, keys, degreesP)
         speed = 0
         cars.append(Car(route[0], route[1:], speed))
     return cars
@@ -241,8 +271,10 @@ def runSimulation(cars, network):
         t = round(t, 2)
     return
 
+global sPathB
 
-def main(edges):
+
+def main(edges, G, sPathBool):
     # Initialise network, for now only one road
 #    edges = [
 #        [(0,0),(100,30)],
@@ -259,13 +291,18 @@ def main(edges):
 #        [(150,0),(300,0)],
 #        [(300,0),(400,0)],
 #    ]
-
+    global sPathB
+    sPathB = sPathBool
     edges += [(end, start) for start, end in edges]
     network = [Edge(start, end) for start, end in edges]
+    totNetworkLength = 0
+    for edge in network:
+        totNetworkLength += edge.getLength()
+    lengthRatio = 40000. / totNetworkLength
+    [edge.setNewLength(lengthRatio) for edge in network]
     [edge.setMinLength() for edge in network if edge.getLength() < 2*maxSpeed]
-
     # Generate all agents
-    cars = addNewCars(totCars, network)
+    cars = addNewCars(totCars, network, G)
     runSimulation(copy.copy(cars), network)
     averageSpeed = sum([car.getAverageSpeed() for car in cars])/len(cars)
     return averageSpeed

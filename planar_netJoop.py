@@ -15,31 +15,36 @@ def main(num, clCoef):
         points.append((np.random.uniform(0,1000),np.random.uniform(0,1000)))   
     point=np.array(points)
     tri = Delaunay(point)
+    points = tri.points
 #    plt.triplot(point[:,0], point[:,1], tri.simplices)
 #    plt.plot(point[:,0], point[:,1], 'o')
 #    plt.show()
-    edges=[]
+    edges = []
+    distances = []
     for i in range(len(tri.points)):
-        neighbors=find_neighbors(i, tri)
+        neighbors = find_neighbors(i, tri)
         for j in neighbors:
-            if j<i:
-                edges.append((i,j))
-    G=nx.Graph()
-    
-    nodes=[]
+            if j < i:
+                edges.append((i, j))
+                distances.append(np.sqrt((points[j, 0] - points[i, 0])**2 +
+                                         (points[j, 1] - points[i, 1])**2))
+    G = nx.Graph()
+
     for i in range(len(tri.points)):
-        nodes.append(i)
-        
-    G.add_nodes_from(nodes)
+        G.add_node(i, pos=tuple(points[i]))
+
+    for i in range(len(edges)):
+        G.add_edge(edges[i][0], edges[i][1], length=distances[i])
+
     G.add_edges_from(edges)
     dif=nx.number_of_edges(G)-num
     edges=G.edges()
     
-    keys=nx.degree(G, nx.nodes(G))
-    degrees = list(nx.degree(G, nx.nodes(G)).values())
-    degreesP = np.array(degrees, dtype=np.float)
-    sumD = np.sum(degreesP)
-    degreesP = degreesP / sumD
+#    keys=nx.degree(G, nx.nodes(G))
+#    degrees = list(nx.degree(G, nx.nodes(G)).values())
+#    degreesP = np.array(degrees, dtype=np.float)
+#    sumD = np.sum(degreesP)
+#    degreesP = degreesP / sumD
 
 #    print np.array(list(nx.degree(G, nx.nodes(G)).values())).mean()
     
@@ -86,8 +91,8 @@ def main(num, clCoef):
     for i in range(0,len(edg)):
         edges.append([tuple(point[edg[i][0]]),tuple(point[edg[i][1]])])
         
-    return edges
+    return edges, G
 
 if __name__ == "__main__":
-    main(145, 0.11)
+    main(145, 0.15)
 
