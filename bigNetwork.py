@@ -147,10 +147,10 @@ class Edge(object):
 # ==============
 # Some constants
 # ==============
-totCars = 500  # number of cars initiated in simulation
+totCars = 1000  # number of cars initiated in simulation
 maxSpeed = 5   # maximum speed (m/s)
-p = 0.2       # change of slowing down every speed update
-interval = 0.4   # time steps between cars
+p = 0.1       # change of slowing down every speed update
+interval = 1.5   # time steps between cars
 steps = 5.0     # number of speed steps as interpreted from the CA model
 
 
@@ -202,7 +202,7 @@ def addNewCars(totCars, network, G):
     cars = []
     for c in range(totCars):
         startNode = random.choice(network).getStart()
-        numEdges = random.choice(range(7))+3
+        numEdges = random.choice(range(18))+3
 #        if c%100 == 0: print('Routing cars ',c+100)
         route = chooseRandomRoute(network, startNode, numEdges,
                                   G, keys, degreesP)
@@ -274,32 +274,18 @@ def runSimulation(cars, network):
 global sPathB
 
 
-def main(edges, G, sPathBool):
-    # Initialise network, for now only one road
-#    edges = [
-#        [(0,0),(100,30)],
-#        [(0,0),(100,-30)],
-#        [(0,0),(150,0)],
-#        [(100,30),(200,30)],
-#        [(100,-30),(200,-30)],
-#        [(200,30),(300,0)],
-#        [(200,-30),(300,0)],
-#        [(100,-30),(150,0)],
-#        [(100,30),(150,0)],
-#        [(150,0),(200,-30)],
-#        [(150,0),(200,30)],
-#        [(150,0),(300,0)],
-#        [(300,0),(400,0)],
-#    ]
+def main(edges, G, sPathBool, normBool):
     global sPathB
     sPathB = sPathBool
     edges += [(end, start) for start, end in edges]
     network = [Edge(start, end) for start, end in edges]
-    totNetworkLength = 0
-    for edge in network:
-        totNetworkLength += edge.getLength()
-    lengthRatio = 40000. / totNetworkLength
-    [edge.setNewLength(lengthRatio) for edge in network]
+    if normBool:
+        totNetworkLength = 0
+        for edge in network:
+            totNetworkLength += edge.getLength()
+        lengthRatio = 40000. / totNetworkLength
+        for edge in network:
+            edge.setNewLength(lengthRatio)
     [edge.setMinLength() for edge in network if edge.getLength() < 2*maxSpeed]
     # Generate all agents
     cars = addNewCars(totCars, network, G)

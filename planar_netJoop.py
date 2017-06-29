@@ -75,12 +75,11 @@ def main(num, clCoef):
 #        if i % 100 == 0:
 #            print i
         if i > 1000:
-            main(num, clCoef)
+            edges, G = main(num, clCoef)
+            break
 
-
+#    plt.figure()
 #    nx.draw(G)
-    
-
 #    print(nx.info(G))
 #    print('cluster=', nx.average_clustering(G))
 #    print('avg length', nx.average_shortest_path_length(G))
@@ -94,5 +93,5 @@ def main(num, clCoef):
     return edges, G
 
 if __name__ == "__main__":
-    main(145, 0.15)
+    main(145, 0.45)
 
